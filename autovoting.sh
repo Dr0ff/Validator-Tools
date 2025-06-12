@@ -1,32 +1,37 @@
 #!/bin/bash
 
-# --- Configuration for Sommelier ---
+# --- Configuration for Your Network ---
 # Name of the CLI binary for the chain (e.g., 'sommelier', 'junod', etc.)
 CLI_NAME="YOUR_NODE_DAEMON" # <<< VERIFY this is the correct command for your node
 
 # --- Node Configuration ---
 # Set to true to use your synchronized local node (omits --node flag, CLI will use its default)
-# Set to false to use the REMOTE_NODE_URL.
+# Set to false to use the NODE_URL.
 USE_LOCAL_NODE=true # <<< CHOOSE true OR false
 
 # URL for the remote RPC node (only used if USE_LOCAL_NODE is false)
-REMOTE_NODE_URL="https://your-sommelier-rpc-node-url:port" # <<< SET THIS IF USING A REMOTE NODE
+# Here is a few RPC PROXYs: 
+# https://rpc.cosmos.directory:443/sommelier, https://rpc.cosmos.directory:443/juno
+# You can find more on https://cosmos.directory
+NODE_URL="https://rpc-node-url:port" # <<< SET THIS IF USING A REMOTE NODE
 
 # --- Chain & Voter Configuration ---
-CHAIN_ID="YOUR_NETWORK_CHAIN-ID"                             # <<< VERIFY! Actual Chain ID for network
-VOTER_KEY_NAME_OR_ADDRESS="votewallet" # Your key name or sommelier1... address
-FEES="5000usomm"                                 # <<< VERIFY! Example fees in Sommelier's native token (e.g., usomm)
-
-GAS="auto"
-GAS_ADJUSTMENT="1.4"
-
-STATE_FILE="${CLI_NAME}_state_simplified.json" # State file (stores only voted proposals)
+CHAIN_ID="YOUR_NETWORK_CHAIN-ID"                  # <<< VERIFY! Actual Chain ID for network		
+VOTERWALLET="votewallet" 		  # Your key name or sommelier1... address
+FEES="5000utoken"                                 # <<< VERIFY! Example fees in Sommelier's native token (e.g., usomm)
 
 # --- Script Behavior Configuration ---
 # Limit for querying active proposals (user's command used 5)
 ACTIVE_PROPOSALS_QUERY_LIMIT=10 # You can increase this if you expect more active proposals simultaneously
 # If voting_end_time is within this many seconds, consider it "last day" for voting
-VOTE_WINDOW_SECONDS=$((100 * 60 * 60)) # 24 hours
+VOTE_WINDOW_SECONDS=$((60 * 60)) # 24 hours
+
+
+GAS="auto"
+GAS_ADJUSTMENT="1.4"
+
+STATE_FILE="${CLI_NAME}_vote_state.json" # State file (stores only voted proposals)
+
 
 # --- Determine Node Command Flag ---
 NODE_COMMAND_PART="" # Will be empty for local node, or --node <URL> for remote
@@ -35,12 +40,12 @@ if [ "$USE_LOCAL_NODE" = true ]; then
     echo "INFO: Script configured to use LOCAL node (via CLI default settings, usually tcp://localhost:26657)."
     # NODE_COMMAND_PART remains empty
 else
-    if [ -z "$REMOTE_NODE_URL" ] || [[ "$REMOTE_NODE_URL" == "https://your-sommelier-rpc-node-url:port" ]]; then
-        echo "ERROR: USE_LOCAL_NODE is false, but REMOTE_NODE_URL is not set or is still the placeholder. Please configure it."
+    if [ -z "$NODE_URL" ] || [[ "$NODE_URL" == "https://your-sommelier-rpc-node-url:port" ]]; then
+        echo "ERROR: USE_LOCAL_NODE is false, but NODE_URL is not set or is still the placeholder. Please configure it."
         exit 1
     fi
-    NODE_COMMAND_PART="--node $REMOTE_NODE_URL"
-    echo "INFO: Script configured to use REMOTE node: $REMOTE_NODE_URL"
+    NODE_COMMAND_PART="--node $NODE_URL"
+    echo "INFO: Script configured to use REMOTE node: $NODE_URL"
 fi
 
 # --- Helper Functions ---
@@ -54,7 +59,7 @@ current_epoch() {
 
 # --- Main Logic ---
 echo "INFO: ${CLI_NAME} Simplified Voting Script started at $(date -u -R)"
-echo "INFO: Voter Address/Key: $VOTER_KEY_NAME_OR_ADDRESS"
+echo "INFO: Voter Address/Key: $VOTERWALLET"
 # Node usage message is now part of the NODE_COMMAND_PART setup
 echo "INFO: Chain ID: $CHAIN_ID"
 
@@ -172,7 +177,7 @@ else
             # CAUTION: Ensure all variables are correct. Test WITHOUT '-y --yes' first.
             # Use $NODE_COMMAND_PART here
             $CLI_NAME tx gov vote "$proposal_id" "$majority_vote_option" \
-                --from "$VOTER_KEY_NAME_OR_ADDRESS" \
+                --from "$VOTERWALLET" \
                 --chain-id "$CHAIN_ID" \
                 $NODE_COMMAND_PART \
                 --fees "$FEES" \
