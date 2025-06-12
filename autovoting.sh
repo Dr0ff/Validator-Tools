@@ -24,7 +24,7 @@ FEES="5000utoken"                                 # <<< VERIFY! Example fees in 
 # Limit for querying active proposals (user's command used 5)
 ACTIVE_PROPOSALS_QUERY_LIMIT=10 # You can increase this if you expect more active proposals simultaneously
 # If voting_end_time is within this many seconds, consider it "last day" for voting
-VOTE_WINDOW_SECONDS=$((60 * 60)) # 24 hours
+VOTE_WINDOW_SECONDS=$((60 * 60)) # 1 hours
 
 
 GAS="auto"
