@@ -22,7 +22,7 @@ sommelier keys add votewallet --keyring-backend test
 <h3> Выдайте разрешение для голосования кошельку votewallet:</h3>
 
 ```
-sommelier tx authz grant $(sommelier keys show votewallet -a) generic --msg-type /cosmos.gov.v1.MsgVote \
+sommelier tx authz grant $(sommelier keys show votewallet --keyring-backend test -a) generic --msg-type /cosmos.gov.v1.MsgVote \
 --from wallet \
 --expiration 1812188258 \
 --gas 250000 \
