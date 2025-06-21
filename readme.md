@@ -33,12 +33,12 @@ sommelier tx authz grant $(sommelier keys show votewallet --keyring-backend test
 Проверка авторизации:
 
 ```
-sommelier q authz grants $(sommelier keys show wallet -a) $(sommelier keys show votewallet -a)
+sommelier q authz grants $(sommelier keys show wallet -a) $(sommelier keys show --keyring-backend test -a)
 ```
 Отзыв авторизаци:
 
 ```
-sommelier tx authz revoke $(sommelier keys show votewallet -a) "/cosmos.gov.v1.MsgVote" --from wallet --gas 250000 --gas-prices 0.025usomm --gas-adjustment 1.5 --chain-id sommelier-3
+sommelier tx authz revoke $(sommelier keys show --keyring-backend test -a) "/cosmos.gov.v1.MsgVote" --from wallet --gas 250000 --gas-prices 0.025usomm --gas-adjustment 1.5 --chain-id sommelier-3
 ```
 
 ---
