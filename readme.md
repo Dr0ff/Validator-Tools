@@ -3,7 +3,7 @@
 ## Подготовка кошелька для голосования
 <h3> Создайте кошелёк с именем  votewallet  которому вы делегируете полномочия</h3>
 
->В моих примерах я буду использовать сеть sommelier
+>В примерах ниже, слово DAEMON, нужно заменить на название бинарника вашей ноды (например: junod, starsd, sentinelhub...)
 >и кошельки с названиями wallet и votewallet (будет удобно, если ваши кошельки будути иметь такие же названия).</br>
 >А также используйте параметры вашей сети (DAEMON, chain-id, denom, gas...)
 
@@ -11,10 +11,10 @@
 <h4>Кошелёк на котором вы будете хранить только минимум необходимый для транзакций связаных с голосованием:</h4>
 
 ```bash
-sommelier keys add votewallet --keyring-backend test
+DAEMON keys add votewallet --keyring-backend test
 ```
 
->Ключ хранится в открытом виде в ~/.YOUR_NODE/keyring-test. Например: ~/.sommelier/keyring-test </br>
+>Ключ хранится в открытом виде в ~/.YOUR_NODE/keyring-test. Например: ~/.DAEMON/keyring-test </br>
 >CLI не будет спрашивать пароль вообще.
 
 ---
@@ -22,23 +22,23 @@ sommelier keys add votewallet --keyring-backend test
 <h3> Выдайте разрешение для голосования кошельку votewallet:</h3>
 
 ```
-sommelier tx authz grant $(sommelier keys show votewallet --keyring-backend test -a) generic --msg-type /cosmos.gov.v1.MsgVote \
+DAEMON tx authz grant $(DAEMON keys show votewallet --keyring-backend test -a) generic --msg-type /cosmos.gov.v1.MsgVote \
 --from wallet \
 --expiration 1812188258 \
 --gas 250000 \
---gas-prices 0.025usomm \
+--gas-prices 0.025utoken \
 --gas-adjustment 1.5 \
---chain-id sommelier-3
+--chain-id CHAIN ID
 ```
 Проверка авторизации:
 
 ```
-sommelier q authz grants $(sommelier keys show wallet -a) $(sommelier keys show --keyring-backend test -a)
+DAEMON q authz grants $(DAEMON keys show wallet -a) $(DAEMON keys show --keyring-backend test -a)
 ```
 Отзыв авторизаци:
 
 ```
-sommelier tx authz revoke $(sommelier keys show --keyring-backend test -a) "/cosmos.gov.v1.MsgVote" --from wallet --gas 250000 --gas-prices 0.025usomm --gas-adjustment 1.5 --chain-id sommelier-3
+DAEMON tx authz revoke $(DAEMON keys show --keyring-backend test -a) "/cosmos.gov.v1.MsgVote" --from wallet --gas 250000 --gas-prices 0.025usomm --gas-adjustment 1.5 --chain-id DAEMON-3
 ```
 
 ---
@@ -50,8 +50,8 @@ sommelier tx authz revoke $(sommelier keys show --keyring-backend test -a) "/cos
 ## Настройка автоголосования
 <h3>Скачайте скрипт на ваш сервер в директорию в которой установлена нода</h3>
 
- ❗️ Переходим в дирректорию в которой установлена нода. У меня это *.sommelier* </br>
-     `cd .sommelier/`
+ ❗️ Переходим в дирректорию в которой установлена нода. У меня это *.DAEMON* </br>
+     `cd .DAEMON/`
 
 ```
 wget https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/autovoting.sh
