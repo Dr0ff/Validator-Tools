@@ -18,7 +18,7 @@ MONITOR_INSTALL_DIR="$HOME/node_monitor"
 
 # URL основного скрипта монитора
 # Замените на реальную ссылку, где будет храниться node_monitor.sh
-MONITOR_SCRIPT_URL="https://example.com/raw/node_monitor.sh" 
+MONITOR_SCRIPT_URL="https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/Node%20Monitor/multi_node_monitor.sh" 
 MONITOR_SCRIPT_NAME="node_monitor.sh"
 
 echo "Начинаем установку монитора нод..."
@@ -60,4 +60,8 @@ echo "   */10 * * * * ${MONITOR_INSTALL_DIR}/${MONITOR_SCRIPT_NAME}"
 echo ""
 echo "Для тестирования вручную: ${MONITOR_INSTALL_DIR}/${MONITOR_SCRIPT_NAME} --debug"
 
+echo -e "\e[93mВнимательно изучите краткую инструкцию приведённую выше!\n\e[0m"
+echo -e "\nДля продолжения нажмите любую клавишу"
+
+read -p ""
 exit 0
