@@ -21,7 +21,7 @@ MONITOR_INSTALL_DIR="$HOME/node_monitor"
 MONITOR_SCRIPT_URL="https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/Node%20Monitor/multi_node_monitor.sh" 
 MONITOR_SCRIPT_NAME="node_monitor.sh"
 
-echo "Начинаем установку монитора нод.....\n"
+echo -e "Начинаем установку монитора нод.....\n"
 
 # 1. Проверяем и создаем директорию
 if [ ! -d "$MONITOR_INSTALL_DIR" ]; then
