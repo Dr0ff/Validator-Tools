@@ -34,7 +34,7 @@ fi
 # --- КОНФИГУРАЦИИ СЕТЕЙ (НУЖНО ЗАПОЛНИТЬ ВРУЧНУЮ!) ---
 declare -A NETWORKS
 
- Пример для Juno
+# Пример для Juno
  NETWORKS[Juno,NODE_BINARY]="${BASE_USER_HOME}/go/bin/junod"
  NETWORKS[Juno,NODE_HOME]="${BASE_USER_HOME}/.juno"
  NETWORKS[Juno,NODE_RPC_PORT]="26657"
