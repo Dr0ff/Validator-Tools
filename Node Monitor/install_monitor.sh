@@ -60,6 +60,6 @@ echo "   */10 * * * * ${MONITOR_INSTALL_DIR}/${MONITOR_SCRIPT_NAME}"
 echo ""
 echo "Для тестирования вручную: ${MONITOR_INSTALL_DIR}/${MONITOR_SCRIPT_NAME} --debug"
 
-echo -e "\n\e[93mВнимательно изучите краткую инструкцию приведённую выше!\n\e[0m"
+echo -e "\n\e[93mОбратите внимание на краткую инструкцию приведённую выше!\n\e[0m"
 
 exit 0
