@@ -1,5 +1,16 @@
 #!/bin/bash
 
+clear
+
+show_logo() {
+    echo -e "\e[92m"
+    curl -s https://raw.githubusercontent.com/Dr0ff/Useful-scripts/refs/heads/main/tt.logo.txt
+    echo -e "\e[0m"
+}
+
+show_logo
+
+
 # --- НАСТРОЙКИ УСТАНОВКИ ---
 # Директория, куда будет установлен монитор.
 # Используем ~ для домашней директории текущего пользователя.
