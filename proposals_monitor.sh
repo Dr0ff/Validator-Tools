@@ -5,8 +5,13 @@ TELEGRAM_BOT_TOKEN="774290nNjMu-_ZfyX29272V2bIQ" # ЗАПОЛНИТЬ! Вста�
 # ID чатов для уведомлений о пропозалах. Можно использовать те же, что и для алертов, или создать новые.
 TELEGRAM_PROPOSAL_CHAT_IDS=( "-478676" ) # ЗАПОЛНИТЬ! Вставьте сюда ID вашего Telegram-чата (или нескольких, разделяя пробелом)
 
-# Пользователь для тега в Telegram. Оставьте пустым (""), если не хотите никого тегать.
-USER_TO_PING="" # ЗАПОЛНИТЬ ПРИ ЖЕЛАНИИ!
+# Пользователи для тега в Telegram. Оставьте пустым (""), если не хотите никого тегать.
+# Если хотите добавить больше пользователей, раскоментируйте их и можете создать новых в этом блоке и добавить их в команду
+# в строке под номером 98
+USER1_TO_PING="" # ЗАПОЛНИТЬ ПРИ ЖЕЛАНИИ!
+# USER2_TO_PING=""
+# USER3_TO_PING=""
+
 
 # Базовая директория для файлов состояния скрипта (чтобы хранить их рядом со скриптом).
 CURRENT_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -31,7 +36,7 @@ if [[ "$1" == "--debug" ]]; then
     echo "Глобальный режим отладки включен."
 fi
 
-# --- ОПРЕДЕЛЕНИЕ ИМЕН СЕТЕЙ КАК ПЕРЕМЕННЫХ (НУМЕРОВАННЫЕ) ---
+# --- ОПРЕДЕЛЕНИЕ ИМЕН СЕТЕЙ КАК ПЕРЕМЕННЫХ ---
 CHAIN1="nolus"
 CHAIN2="sommelier"
 CHAIN3="juno"
@@ -39,7 +44,7 @@ CHAIN4="sentinel"
 CHAIN5="stargaze"
 CHAIN6="persistence"
 
-# --- КОНФИГУРАЦИИ СЕТЕЙ (НУЖНО ЗАПОЛНИТЬ ВРУЧНУЮ!) ---
+# --- КОНФИГУРАЦИИ СЕТЕЙ ---
 declare -A NETWORKS
 
 declare -a NETWORK_NAMES=(
@@ -90,7 +95,7 @@ send_telegram() {
     local full_message="$message"
 
     if [[ -n "$USER_TO_PING" ]]; then
-        full_message="${full_message} ${USER_TO_PING}"
+        full_message="${full_message} ${USER1_TO_PING} ${USER2_TO_PING} ${USER3_TO_PING}"
     fi
 
     for CHAT_ID in "${TELEGRAM_PROPOSAL_CHAT_IDS[@]}"; do
@@ -150,7 +155,7 @@ monitor_proposals_for_network() {
                 attempt=$((attempt + 1))
                 [ "$debug_enabled" = true ] && echo "DEBUG: Попытка ${attempt}/${MAX_RETRIES} для ${node_name} с Gov Version ${version_attempt} URL: ${query_url}"
                 if query_output=$(curl -sS --fail -m 15 "$query_url" 2>&1); then
-                    # КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Проверяем, что JSON содержит массив proposals
+                    #  Проверяем, что JSON содержит массив proposals
                     if echo "$query_output" | jq -e '.proposals | type == "array"' >/dev/null 2>&1; then
                         success=true
                         current_gov_version="$version_attempt"
@@ -281,7 +286,7 @@ monitor_proposals_for_network() {
         echo "$proposal_id" >> "$temp_active_proposals_file"
 
         if [ "$already_known" = false ]; then
-            local message_text="📢 НОВОЕ ПРЕДЛОЖЕНИЕ в ${node_name}:%0A"
+            local message_text="📢 Новое Голосование в сети ${node_name}:%0A"
             message_text+="ID: ${proposal_id}%0A"
             message_text+="Заголовок: ${proposal_title}%0A"
             message_text+="Статус: ${proposal_status}%0A"
@@ -311,7 +316,7 @@ monitor_proposals_for_network() {
             local time_diff_hours=$((time_diff_seconds / 3600))
 
             if (( time_diff_hours > 0 && time_diff_hours <= REMINDER_HOURS_THRESHOLD )); then
-                local reminder_message="⏰ НАПОМИНАНИЕ: Голосование по предложению ${node_name} ID ${proposal_id} '${proposal_title}' скоро закончится!%0AОсталось примерно ${time_diff_hours} часов.%0AОкончание: $(date -d "$voting_end_time" +"%Y-%m-%d %H:%M:%S UTC" 2>/dev/null)"
+                local reminder_message="⏰ Напоминание: Голосование по предложению ${node_name} ID ${proposal_id} '${proposal_title}' скоро закончится!%0AОсталось примерно ${time_diff_hours} часов.%0AОкончание: $(date -d "$voting_end_time" +"%Y-%m-%d %H:%M:%S UTC" 2>/dev/null)"
                 send_telegram "$reminder_message"
                 [ "$debug_enabled" = true ] && echo "DEBUG: Отправлено напоминание о голосовании для ID ${proposal_id} (${time_diff_hours}ч осталось)."
             fi
