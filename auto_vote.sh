@@ -14,7 +14,7 @@ USER_TO_PING=""
 
 # --- Configuration for Your Network ---
 
-NETWORK_NAME="NOLUS"
+NETWORK_NAME="НАЗВАНИЕ_СЕТИ"
 
 # Name of the CLI binary for the chain (e.g., 'sommelier', 'junod', 'nolusd', etc.)
 CLI_NAME="nolusd" # <<< VERIFY this is the correct command for your node
@@ -40,7 +40,7 @@ FEES="5000unls"                # <<< VERIFY! Example fees in Nolus' native token
 # Limit for querying active proposals
 ACTIVE_PROPOSALS_QUERY_LIMIT=10 # You can increase this if you expect more active proposals simultaneously
 # If voting_end_time is within this many seconds, consider it "last day" for voting
-VOTE_WINDOW_SECONDS=$((60 * 60 * 4)) # 4 hours before end of voting (as requested)
+SET_VOTE_WINDOW=4 # 4 hours before end of voting
 
 GAS="auto"
 GAS_ADJUSTMENT="1.4"
@@ -48,6 +48,8 @@ GAS_ADJUSTMENT="1.4"
 # State file (stores only voted proposals)
 CURRENT_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 STATE_FILE="${CURRENT_SCRIPT_DIR}/${CLI_NAME}_vote_state.json"
+
+VOTE_WINDOW_SECONDS=$((60 * 60 * ${SET_VOTE_WINDOW))
 
 # --- DEBUGGING CONTROL ---
 DEBUG_MODE=false
@@ -83,7 +85,7 @@ send_telegram_message() {
          -H "Content-Type: application/json" \
          -d "{
              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
-             \"text\": \"${message}\",
+             \"text\": \"${message} ${USER_TO_PING}\",
              \"parse_mode\": \"Markdown\"
          }" > /dev/null 2>&1
 
@@ -361,6 +363,13 @@ else
             echo "INFO: Voting period for proposal $proposal_id has already ended."
         else
             echo "INFO: Proposal $proposal_id is active, but voting window not yet reached (ends in $time_remaining_hours hours)."
+               # Опционально: Больше для проверки работы службы сообщений
+               # TELEGRAM_INFO_MESSAGE="📢  INFO: Предложение $proposal_id  в сети $NETWORK_NAME, активно,
+               # я посмотрю как голосует большинство и автоматически проголосую,
+               # но не ранее чем за $SET_VOTE_WINDOW часа до окончания.
+               # (окончание голосования через $time_remaining_hours часов)."
+               # send_telegram_message "$TELEGRAM_INFO_MESSAGE"
+        
         fi
     done
 fi
