@@ -7,7 +7,7 @@ TELEGRAM_PROPOSAL_CHAT_IDS=( "-478676" ) # ЗАПОЛНИТЬ! Вставьте 
 
 # Пользователи для тега в Telegram. Оставьте пустым (""), если не хотите никого тегать.
 # Если хотите добавить больше пользователей, раскоментируйте их и можете создать новых в этом блоке и добавить их в команду
-# в строке под номером 98
+# в строке под номером #102
 USER1_TO_PING="" # ЗАПОЛНИТЬ ПРИ ЖЕЛАНИИ!
 # USER2_TO_PING=""
 # USER3_TO_PING=""
@@ -23,6 +23,10 @@ REMINDER_HOURS_THRESHOLD=24
 # Статусы предложений, которые нужно мониторить.
 # По умолчанию: предложения на стадии депозита или голосования.
 PROPOSAL_STATUSES_TO_MONITOR=( "PROPOSAL_STATUS_VOTING_PERIOD" "PROPOSAL_STATUS_DEPOSIT_PERIOD" )
+
+# Количество последних предложений для получения от REST API.
+# Для мониторинга достаточно небольшого числа (5-10).
+PROPOSALS_FETCH_LIMIT=5
 
 # --- НАСТРОЙКИ ПОВТОРНЫХ ПОПЫТОК (RETRY LOGIC) ---
 MAX_RETRIES=5        # Максимальное количество попыток получить данные (1 = одна попытка без повторов)
@@ -95,7 +99,7 @@ send_telegram() {
     local full_message="$message"
 
     if [[ -n "$USER_TO_PING" ]]; then
-        full_message="${full_message} ${USER1_TO_PING} ${USER2_TO_PING} ${USER3_TO_PING}"
+        full_message="${full_message} ${USER1_TO_PING}"
     fi
 
     for CHAT_ID in "${TELEGRAM_PROPOSAL_CHAT_IDS[@]}"; do
@@ -122,7 +126,7 @@ monitor_proposals_for_network() {
         current_gov_version="${NETWORKS[${node_name},GOV_MODULE_VERSION]}"
         [ "$debug_enabled" = true ] && echo "DEBUG: Для ${node_name} принудительно установлена Gov Version: ${current_gov_version}"
 
-        local query_url="${rest_api_base_url}/cosmos/gov/${current_gov_version}/proposals?pagination.reverse=true"
+        local query_url="${rest_api_base_url}/cosmos/gov/${current_gov_version}/proposals?pagination.limit=${PROPOSALS_FETCH_LIMIT}&pagination.reverse=true"
         local attempt=0
         while [ "$attempt" -lt "$MAX_RETRIES" ]; do
             attempt=$((attempt + 1))
@@ -149,7 +153,7 @@ monitor_proposals_for_network() {
         local potential_versions=( "v1" "v1beta1" ) # Порядок важен: v1, затем v1beta1
         for version_attempt in "${potential_versions[@]}"; do
             [ "$debug_enabled" = true ] && echo "DEBUG: Пробуем Gov Version: ${version_attempt} для ${node_name}"
-            local query_url="${rest_api_base_url}/cosmos/gov/${version_attempt}/proposals?pagination.reverse=true"
+            local query_url="${rest_api_base_url}/cosmos/gov/${version_attempt}/proposals?pagination.limit=${PROPOSALS_FETCH_LIMIT}&pagination.reverse=true"
             local attempt=0
             while [ "$attempt" -lt "$MAX_RETRIES" ]; do
                 attempt=$((attempt + 1))
