@@ -79,5 +79,5 @@ FEES="5000utoken"                 # Укажите fee и деном для ва
 <h3>Запускаем скприт:</h3>
 
 ```
-bash autovoting.sh
+bash auto_vote.sh
 ```
