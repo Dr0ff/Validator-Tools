@@ -54,7 +54,7 @@ DAEMON tx authz revoke $(DAEMON keys show --keyring-backend test -a) "/cosmos.go
      `cd .DAEMON/`
 
 ```
-wget https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/autovoting.sh
+wget https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/auto_vote.sh
 ```
 ---
 
