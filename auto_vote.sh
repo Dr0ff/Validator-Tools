@@ -10,8 +10,12 @@ ENABLE_TELEGRAM_NOTIFICATIONS=true # <<< SET to true to enable
 TELEGRAM_BOT_TOKEN="ВАШ_БОТ_ТОКЕН" # <<< REQUIRED if ENABLE_TELEGRAM_NOTIFICATIONS is true
 # Your Telegram Chat ID (can be user ID or group/channel ID like -123456789)
 TELEGRAM_CHAT_ID="ВАШ_CHAT_ID"     # <<< REQUIRED if ENABLE_TELEGRAM_NOTIFICATIONS is true
+USER_TO_PING=""
 
 # --- Configuration for Your Network ---
+
+NETWORK_NAME="NOLUS"
+
 # Name of the CLI binary for the chain (e.g., 'sommelier', 'junod', 'nolusd', etc.)
 CLI_NAME="nolusd" # <<< VERIFY this is the correct command for your node
 
