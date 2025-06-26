@@ -12,7 +12,9 @@ TELEGRAM_BOT_TOKEN="ВАШ_БОТ_ТОКЕН" # <<< REQUIRED if ENABLE_TELEGRAM_
 TELEGRAM_CHAT_ID="ВАШ_CHAT_ID"     # <<< REQUIRED if ENABLE_TELEGRAM_NOTIFICATIONS is true
 USER_TO_PING=""
 
-SET_VOTE_WINDOW=4 # 4 hours before end of voting
+# Set your desired voting window (the time to the end of voting period) when bot will vote for you
+# You need to to setup your crontab -e to run the script one in this frame time (5 hrs in this case)
+SET_VOTE_WINDOW=6       # 6 hours before end of voting. You need to setup your crontab -e to run the script
 
 # --- Configuration for Your Network ---
 
@@ -342,31 +344,35 @@ else
                 proposals_voted_on_json=$(echo "$proposals_voted_on_json" | jq ". + {\"$proposal_id\": \"$(date -u -R)\"}")
                 echo "INFO: Proposal $proposal_id marked as voted in the state."
             
-            # Отправляем сообщение в Telegram
-                TELEGRAM_MESSAGE="✅  Я проголосовал в сети $NETWORK_NAME
-                ID предложения: $proposal_id
+# Отправляем сообщение в Telegram
+                TELEGRAM_MESSAGE="✅  Я проголосовал *$majority_vote_option* в сети *$NETWORK_NAME*
+                По предложению: $proposal_id
+                Название: $proposal_title
                 Выбранный голос: $majority_vote_option
-                Кошелек: $VOTERWALLET "
+#               Кошелек: $VOTERWALLET"
                 send_telegram_message "$TELEGRAM_MESSAGE"
             
             else
                 echo "ERROR: Failed to submit vote for proposal ID $proposal_id. Command exit status: $VOTE_EXIT_STATUS"
                 echo "Full vote command error output: $vote_output"
 
-                # Опционально: можно отправить сообщение об ошибке в TG
-                 TELEGRAM_ERROR_MESSAGE="❌ Ошибка голосования в сети $NETWORK_NAME
+# Опционально: можно отправить сообщение об ошибке в TG
+                 TELEGRAM_ERROR_MESSAGE="❌ Ошибка голосования в сети *$NETWORK_NAME*
+                 Название: $proposal_title
                  ID предложения: $proposal_id
-                 Ошибка: $vote_output "
+                 Ошибка: $vote_output"
                  send_telegram_message "$TELEGRAM_ERROR_MESSAGE"
                 
             fi
-            # --- END OF ACTUAL VOTE COMMAND SECTION ---
+            
         elif [[ $time_remaining_seconds -le 0 ]]; then
             echo "INFO: Voting period for proposal $proposal_id has already ended."
         else
             echo "INFO: Proposal $proposal_id is active, but voting window, $SET_VOTE_WINDOW hrs, not yet reached (ends in $time_remaining_hours hours)."
-               # Опционально: Больше для проверки работы службы сообщений
-               # TELEGRAM_INFO_MESSAGE="📢  INFO: Предложение $proposal_id  в сети $NETWORK_NAME, активно!
+
+# Опционально: Больше для проверки работы службы сообщений
+               # TELEGRAM_INFO_MESSAGE="📢  INFO: Предложение $proposal_id  в сети *$NETWORK_NAME*, активно!
+               # *Название*: $proposal_title
                # Я проголосую автоматически, так же, как и большинство,
                # но не ранее чем за $SET_VOTE_WINDOW часа до окончания.
                # (окончание голосования через $time_remaining_hours часов). "
