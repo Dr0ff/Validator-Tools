@@ -343,10 +343,10 @@ else
                 echo "INFO: Proposal $proposal_id marked as voted in the state."
             
             # Отправляем сообщение в Telegram
-                TELEGRAM_MESSAGE="✅ Голос для $CLI_NAME
-Пропозиция ID: $proposal_id
-Выбранный голос: $majority_vote_option
-Кошелек: $VOTERWALLET"
+                TELEGRAM_MESSAGE="✅  Я проголосовал в сети $NETWORK_NAME
+                ID предложения: $proposal_id
+                Выбранный голос: $majority_vote_option
+                Кошелек: $VOTERWALLET "
                 send_telegram_message "$TELEGRAM_MESSAGE"
             
             else
@@ -354,10 +354,10 @@ else
                 echo "Full vote command error output: $vote_output"
 
                 # Опционально: можно отправить сообщение об ошибке в TG
-                # TELEGRAM_ERROR_MESSAGE="❌ Ошибка голосования для $CLI_NAME
-                # Пропозиция ID: $proposal_id
-                # Ошибка: $vote_output"
-                # send_telegram_message "$TELEGRAM_ERROR_MESSAGE"
+                 TELEGRAM_ERROR_MESSAGE="❌ Ошибка голосования в сети $NETWORK_NAME
+                 ID предложения: $proposal_id
+                 Ошибка: $vote_output "
+                 send_telegram_message "$TELEGRAM_ERROR_MESSAGE"
                 
             fi
             # --- END OF ACTUAL VOTE COMMAND SECTION ---
@@ -369,7 +369,7 @@ else
                # TELEGRAM_INFO_MESSAGE="📢  INFO: Предложение $proposal_id  в сети $NETWORK_NAME, активно!
                # Я проголосую автоматически, так же, как и большинство,
                # но не ранее чем за $SET_VOTE_WINDOW часа до окончания.
-               # (окончание голосования через $time_remaining_hours часов)."
+               # (окончание голосования через $time_remaining_hours часов). "
                # send_telegram_message "$TELEGRAM_INFO_MESSAGE"
         
         fi
