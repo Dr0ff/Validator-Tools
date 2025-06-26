@@ -181,7 +181,7 @@ monitor_proposals_for_network() {
     fi
 
     if [ "$success" = false ]; then
-        send_telegram "❌ Ошибка при получении списка предложений для ${node_name} через REST Proxy ${rest_api_base_url}. Все ${MAX_RETRIES} попыток (для каждой версии) провалились. Последняя ошибка: '${curl_error_message}'"
+        send_telegram "❌ Ошибка при получении списка предложений для *${node_name}* через REST Proxy ${rest_api_base_url}. Все ${MAX_RETRIES} попыток (для каждой версии) провалились. Последняя ошибка: '${curl_error_message}'"
         [ "$debug_enabled" = true ] && echo "DEBUG: Все попытки получить данные для ${node_name} провалились. Пропускаем проверку предложений."
         return 1
     fi
@@ -290,8 +290,8 @@ monitor_proposals_for_network() {
         echo "$proposal_id" >> "$temp_active_proposals_file"
 
         if [ "$already_known" = false ]; then
-            local message_text="📢 Новое Голосование в сети ${node_name}:%0A"
-            message_text+="ID: ${proposal_id}%0A"
+            local message_text="📢 *Новое Голосование в сети ${node_name}*:%0A"
+            message_text+="ID: {proposal_id}%0A"
             message_text+="Заголовок: ${proposal_title}%0A"
             message_text+="Статус: ${proposal_status}%0A"
 
@@ -320,7 +320,7 @@ monitor_proposals_for_network() {
             local time_diff_hours=$((time_diff_seconds / 3600))
 
             if (( time_diff_hours > 0 && time_diff_hours <= REMINDER_HOURS_THRESHOLD )); then
-                local reminder_message="⏰ Напоминание: Голосование по предложению ${node_name} ID ${proposal_id} '${proposal_title}' скоро закончится!%0AОсталось примерно ${time_diff_hours} часов.%0AОкончание: $(date -d "$voting_end_time" +"%Y-%m-%d %H:%M:%S UTC" 2>/dev/null)"
+                local reminder_message="⏰ *НАПОМИНАНИЕ*: Голосование по предложению ${node_name} ID ${proposal_id} '${proposal_title}' скоро закончится!%0AОсталось примерно ${time_diff_hours} часов.%0AОкончание: $(date -d "$voting_end_time" +"%Y-%m-%d %H:%M:%S UTC" 2>/dev/null)"
                 send_telegram "$reminder_message"
                 [ "$debug_enabled" = true ] && echo "DEBUG: Отправлено напоминание о голосовании для ID ${proposal_id} (${time_diff_hours}ч осталось)."
             fi
