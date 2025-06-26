@@ -1,22 +1,51 @@
 #!/bin/bash
 
+# health_monitor.sh
+# run with --debug flag to get verbose mode. Example: bash health_monitor.sh --debug
+
 # --- ОБЩИЕ НАСТРОЙКИ (КОТОРЫЕ НУЖНО ЗАПОЛНИТЬ ВРУЧНУЮ!) ---
-TELEGRAM_BOT_TOKEN="7742907053:AAEBXUpVX29272V2bIQ" # ЗАПОЛНИТЬ!
+TELEGRAM_BOT_TOKEN="7742907053:AAEBXUpVX272V2bIQ" # ЗАПОЛНИТЬ!
 TELEGRAM_ALERT_CHAT_IDS=( "-47676" ) # ЗАПОЛНИТЬ!
 TELEGRAM_REPORT_CHAT_IDS=( "-4776" ) # ЗАПОЛНИТЬ!
 TELEGRAM_INFO_CHAT_IDS=( "-4776" ) # ЗАПОЛНИТЬ!
 
 # Пользователь для тега в Telegram. Оставьте пустым (""), если не хотите никого тегать.
-# Пример: "@Bob_the_Builder"
-USER_TO_PING="@Bob_the_Builder" # ЗАПОЛНИТЬ ПРИ ЖЕЛАНИИ!
+# Пример: USER_TO_PING="@Bob_the_Builder"
+USER_TO_PING="" # ЗАПОЛНИТЬ ПРИ ЖЕЛАНИИ!
 
-# Базовая директория пользователя, где обычно находятся .go/bin и .<node_name> директории нод.
-# Пример: "/home/lilfox" или "/home/ubuntu"
-# ЭТО КРАЙНЕ ВАЖНО ЗАПОЛНИТЬ ПРАВИЛЬНО!
-BASE_USER_HOME="/home/lilfox" # ЗАПОЛНИТЬ! (Например, если вы lilfox, это будет /home/lilfox)
+# --- Настройка сетей ---
+
+# Чтобы получить PUBKEY_JSON, используйте один из способов:
+# 1) Для любого валидатора: DAEMON query staking validator $VALOPER_ADDRESS --output json | jq ->
+# 2) Для вашей локальной ноды: DAEMON tendermint show-validator
+# 3) Посмотрите на странице валидатора, например на https://ping.pub/juno/staking
+
+# Настройки для первой сети
+NET_1="Network name"         # Имя сети. Например: Juno
+NET_1_DAEMON="DAEMON"        # Назвение демона (бинарника). Например: junod
+NET_1_DIR=".node"            # Название директории в которой находится нода. Например .juno
+NET_1_PORT="26657"           # Порт с которым работает нода. *Сейчас прописан стандартный порт ноды
+# Обязательно заполните поля для VALOPER адреса и PUBKEY
+# Они находятся чуть ниже,в блоке "MAССИВ" в секции: "Пример для NET_1"
+
+# Настройки для второй сети.
+# Если используете вторую ноду то заполните параметры в этом блоке и 
+# обязательно пропишите параметр "NET_2" в команде (найдёте ниже, в секции МАССИВ) declare -a NETWORK_NAMES=( "NET_1" )
+NET_2="Sentinel"
+NET_2_DAEMON="sentinelhub"
+NET_2_DIR=".sentinelhub"
+NET_2_PORT="36657"
+# Обязательно заполните поля для VALOPER адреса и PUBKEY
+# Они находятся чуть ниже,в блоке "MAССИВ" в секции: "Пример для NET_2"
+
+# Настройки для ещё одной сети
+# NET_3="Sommelier"
+# .....
 
 MISSED_BLOCKS_THRESHOLD=10
 CRON_INTERVAL=10 # Интервал, как часто этот скрипт будет запускаться (в минутах)
+
+BASE_USER_HOME="$HOME" # Домашняя директория находится автоматически, но можно заполнить вручную (Например: /home/lilfox)
 
 # Базовая директория для файлов состояния скрипта.
 # Мы будем хранить их рядом с самим скриптом, который установлен в ~/node_monitor.
@@ -30,30 +59,34 @@ if [[ "$1" == "--debug" ]]; then
     echo "Глобальный режим отладки включен."
 fi
 
-# --- КОНФИГУРАЦИИ СЕТЕЙ (НУЖНО ЗАПОЛНИТЬ ВРУЧНУЮ!) ---
+# --- КОНФИГУРАЦИИ СЕТЕЙ ---
 declare -A NETWORKS
 
-# === ОБЯЗАТЕЛЬНО ЗАПОЛНИТЕ ЭТОТ МАССИВ! ===
+#    ⚠️           !!!-----  МАССИВ  -----!!!          ⚠️
+
+#        === ОБЯЗАТЕЛЬНО ЗАПОЛНИТЕ ЭТОТ МАССИВ! ===
 # Это список уникальных имен ваших сетей.
-# Добавьте сюда все имена сетей, которые вы хотите мониторить (например, "Nolus", "Juno", "Sommelier").
-declare -a NETWORK_NAMES=( "Nolus" "Sommelier" )
+# Добавьте в команду все имена сетей, которые вы хотите мониторить 
+# Пример для трёх сетей: "declare -a NETWORK_NAMES=( "$NET_1" "$NET_2" "$NET_3" )".
+declare -a NETWORK_NAMES=( "$NET_1" )
 
-# Пример для Nolus
-NETWORKS[Nolus,NODE_BINARY]="${BASE_USER_HOME}/go/bin/nolusd"
-NETWORKS[Nolus,NODE_HOME]="${BASE_USER_HOME}/.nolus"
-NETWORKS[Nolus,NODE_RPC_PORT]="26657"
-NETWORKS[Nolus,VALOPER_ADDRESS]="nolusvaloper1....."
-NETWORKS[Nolus,PUBKEY_JSON]='{"@type":"/cosmos.crypto.ed25519.PubKey","key":"Zj1ux6DSNskMu......"}'
+# ⚠️   Пример для NET_1
+NETWORKS[${NET_1},NODE_BINARY]="${BASE_USER_HOME}/go/bin/$NET_1_DAEMON"
+NETWORKS[${NET_1},NODE_HOME]="${BASE_USER_HOME}/$NET_1_DIR"
+NETWORKS[${NET_1},NODE_RPC_PORT]="$NET_1_PORT"
+NETWORKS[${NET_1},VALOPER_ADDRESS]="nolusvaloper1....."   # Не забудьте вставить адрес валидатора!
+NETWORKS[${NET_1},PUBKEY_JSON]='{"@type":"/cosmos.crypto.ed25519.PubKey","key":"Zj1ux6DSNskMu......"}'  # Не забудьте вставить PUBKEY!
 
-# Пример для Sommelier
-NETWORKS[Sommelier,NODE_BINARY]="${BASE_USER_HOME}/go/bin/sommelier"
-NETWORKS[Sommelier,NODE_HOME]="${BASE_USER_HOME}/.sommelier"
-NETWORKS[Sommelier,NODE_RPC_PORT]="36657"
-NETWORKS[Sommelier,VALOPER_ADDRESS]="sommvaloper1...."
-NETWORKS[Sommelier,PUBKEY_JSON]='{"@type":"/cosmos.crypto.ed25519.PubKey","key":"MlQWKox2Rb....."}'
+# ⚠️    Пример для NET_2
+NETWORKS[${NET_2},NODE_BINARY]="${BASE_USER_HOME}/go/bin/$NET_2_DAEMON"
+NETWORKS[${NET_2},NODE_HOME]="${BASE_USER_HOME}/$NET_2_DIR"
+NETWORKS[${NET_2},NODE_RPC_PORT]="$NET_2_PORT"
+NETWORKS[${NET_2},VALOPER_ADDRESS]="sommvaloper1...."    # Не забудьте вставить адрес валидатора!
+NETWORKS[${NET_2},PUBKEY_JSON]='{"@type":"/cosmos.crypto.ed25519.PubKey","key":"MlQWKox2Rb....."}'      # Не забудьте вставить PUBKEY!
+
 
 # Проверка наличия jq
-command -v jq >/dev/null 2>&1 || { echo >&2 "jq не установлен. Установите его."; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo >&2 "jq не установлен. Установите его командой sudo apt install jq"; exit 1; }
 
 # --- ОТПРАВКА СООБЩЕНИЙ В TELEGRAM ---
 send_telegram() {
@@ -289,5 +322,8 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
     fi
 
     [ "$GLOBAL_DEBUG" = true ] && echo "--- Проверка для сети: ${NODE_NAME} завершена ---"
-    [ "$GLOBAL_DEBUG" = true ] && echo ""
+    [ "$GLOBAL_DEBUG" = true ] && echo " "
+        
+    [ "$GLOBAL_DEBUG" = true ] && echo "Проверка завершена $(date -u -R)"
+    [ "$GLOBAL_DEBUG" = true ] && echo " "
 done
