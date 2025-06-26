@@ -12,6 +12,8 @@ TELEGRAM_BOT_TOKEN="ВАШ_БОТ_ТОКЕН" # <<< REQUIRED if ENABLE_TELEGRAM_
 TELEGRAM_CHAT_ID="ВАШ_CHAT_ID"     # <<< REQUIRED if ENABLE_TELEGRAM_NOTIFICATIONS is true
 USER_TO_PING=""
 
+SET_VOTE_WINDOW=4 # 4 hours before end of voting
+
 # --- Configuration for Your Network ---
 
 NETWORK_NAME="НАЗВАНИЕ_СЕТИ"
@@ -40,7 +42,7 @@ FEES="5000unls"                # <<< VERIFY! Example fees in Nolus' native token
 # Limit for querying active proposals
 ACTIVE_PROPOSALS_QUERY_LIMIT=10 # You can increase this if you expect more active proposals simultaneously
 # If voting_end_time is within this many seconds, consider it "last day" for voting
-SET_VOTE_WINDOW=4 # 4 hours before end of voting
+
 
 GAS="auto"
 GAS_ADJUSTMENT="1.4"
@@ -49,7 +51,7 @@ GAS_ADJUSTMENT="1.4"
 CURRENT_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 STATE_FILE="${CURRENT_SCRIPT_DIR}/${CLI_NAME}_vote_state.json"
 
-VOTE_WINDOW_SECONDS=$((60 * 60 * ${SET_VOTE_WINDOW))
+VOTE_WINDOW_SECONDS=$((60 * 60 * ${SET_VOTE_WINDOW})
 
 # --- DEBUGGING CONTROL ---
 DEBUG_MODE=false
@@ -362,7 +364,7 @@ else
         elif [[ $time_remaining_seconds -le 0 ]]; then
             echo "INFO: Voting period for proposal $proposal_id has already ended."
         else
-            echo "INFO: Proposal $proposal_id is active, but voting window not yet reached (ends in $time_remaining_hours hours)."
+            echo "INFO: Proposal $proposal_id is active, but voting window, $SET_VOTE_WINDOW hrs, not yet reached (ends in $time_remaining_hours hours)."
                # Опционально: Больше для проверки работы службы сообщений
                # TELEGRAM_INFO_MESSAGE="📢  INFO: Предложение $proposal_id  в сети $NETWORK_NAME, активно!
                # Я проголосую автоматически, так же, как и большинство,
