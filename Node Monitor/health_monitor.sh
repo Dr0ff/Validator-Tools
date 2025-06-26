@@ -115,7 +115,7 @@ check_node_health() {
     local debug_enabled="$3"
 
     if [ -z "$rpc_port" ]; then
-        send_telegram "⚠️ ОШИБКА КОНФИГУРАЦИИ: Порт RPC для ${node_name} не указан. Проверьте настройки." "ALERT"
+        send_telegram "⚠️ ОШИБКА КОНФИГУРАЦИИ: %0AПорт RPC для ${node_name^^} не указан. %0AПроверьте настройки." "ALERT"
         return 1
     fi
 
@@ -124,18 +124,18 @@ check_node_health() {
     [ "$debug_enabled" = true ] && echo "DEBUG: Проверка RPC для ${node_name} на ${rpc_url}"
 
     if ! curl -s --fail --max-time 10 "${rpc_url}/health" | grep -q 'result'; then
-        send_telegram "⛔️ НОДА НЕДОСТУПНА: ${node_name} не отвечает на RPC (порт ${rpc_port})." "ALERT"
+        send_telegram "⛔️ НОДА НЕДОСТУПНА: %0A${node_name^^} не отвечает на RPC (порт ${rpc_port})." "ALERT"
         return 1
     fi
 
     local sync_status
     if ! sync_status=$(curl -s --fail --max-time 10 "${rpc_url}/status" | jq -r '.result.sync_info.catching_up' 2>/dev/null); then
-        send_telegram "⚠️ Ошибка при получении sync_info от ${node_name}. Проверьте RPC и формат ответа." "ALERT"
+        send_telegram "⚠️ Ошибка при получении sync_info от ${node_name^^}. %0AПроверьте RPC и формат ответа." "ALERT"
         return 1
     fi
 
     if [[ "$sync_status" != "false" ]]; then
-        send_telegram "⚠️ ${node_name} в режиме синхронизации. Возможны пропуски." "ALERT" "INFO"
+        send_telegram "⚠️ ${node_name^^} в режиме синхронизации. %0AВозможны пропуски." "ALERT" "INFO"
     fi
     return 0
 }
@@ -161,7 +161,7 @@ check_missed_blocks() {
         --node "tcp://localhost:$rpc_port" \
         --home "$node_home" \
         --output json 2>&1); then
-        send_telegram "❌ Ошибка при получении signing-info для ${node_name}. Проверьте бинарник и параметры. Вывод ошибки: '${QUERY_OUTPUT}'" "ALERT"
+        send_telegram "❌ Ошибка при получении signing-info для ${node_name^^}. %0AПроверьте бинарник и параметры. Вывод ошибки: '${QUERY_OUTPUT}'" "ALERT"
         return 1
     fi
 
@@ -190,7 +190,7 @@ check_missed_blocks() {
     [ "$debug_enabled" = true ] && echo "DEBUG: Проверка ${node_name}: новых пропущенных блоков за ${CRON_INTERVAL} минут: ${NEWLY_MISSED_BLOCKS}. Общий: ${CURRENT_MISSED_BLOCKS}."
 
     if [ "$NEWLY_MISSED_BLOCKS" -ge "$MISSED_BLOCKS_THRESHOLD" ] && [ "$NEWLY_MISSED_BLOCKS" -gt 0 ]; then
-        send_telegram "🚨 ТРЕВОГА: ${node_name} пропустил ${NEWLY_MISSED_BLOCKS} блоков за ${CRON_INTERVAL} минут! Общий счетчик: ${CURRENT_MISSED_BLOCKS}." "ALERT"
+        send_telegram "🚨 ТРЕВОГА: %0A${node_name} пропустил ${NEWLY_MISSED_BLOCKS} блоков за ${CRON_INTERVAL} минут! %0AОбщий счетчик: ${CURRENT_MISSED_BLOCKS}." "ALERT"
     fi
 
     mkdir -p "$(dirname "$state_file")"
@@ -219,7 +219,7 @@ check_missed_blocks() {
             if (( MISSED_FOR_24H < 0 )); then
                 MISSED_FOR_24H=0
             fi
-            send_telegram "📊 Ежедневный отчет для ${node_name}:%0AЗа сутки пропущено: ${MISSED_FOR_24H} блоков.%0AТекущий счетчик: ${CURRENT_MISSED_BLOCKS}." "REPORT" "INFO"
+            send_telegram "📊 Ежедневный отчёт для ${node_name^^}:%0AЗа сутки пропущено: ${MISSED_FOR_24H} блоков.%0AТекущий счетчик: ${CURRENT_MISSED_BLOCKS}." "REPORT" "INFO"
         fi
         echo "$CURRENT_DAY" > "$daily_report_file"
         echo "$CURRENT_MISSED_BLOCKS" > "$daily_counter_file"
@@ -236,7 +236,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
     if [[ -z "${NETWORKS[${NODE_NAME},NODE_BINARY]}" || \
           -z "${NETWORKS[${NODE_NAME},NODE_HOME]}" || \
           -z "${NETWORKS[${NODE_NAME},NODE_RPC_PORT]}" ]]; then
-        send_telegram "⚠️ ОШИБКА КОНФИГУРАЦИИ: Отсутствуют обязательные параметры (NODE_BINARY, NODE_HOME, NODE_RPC_PORT) для сети ${NODE_NAME}. Пропускаю мониторинг этой сети." "ALERT"
+        send_telegram "⚠️ ОШИБКА КОНФИГУРАЦИИ: %0AОтсутствуют обязательные параметры (NODE_BINARY, NODE_HOME, NODE_RPC_PORT) для сети ${NODE_NAME^^}. %0AПропускаю мониторинг этой сети." "ALERT"
         [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: Отсутствуют обязательные параметры (NODE_BINARY, NODE_HOME, NODE_RPC_PORT) для сети ${NODE_NAME}. Пропускаю мониторинг этой сети."
         continue
     fi
@@ -260,7 +260,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
     if [[ -n "$VALOPER_ADDRESS" && -n "$PUBKEY_JSON" ]]; then
         STAKING_VALIDATOR_OUTPUT=""
         if ! STAKING_VALIDATOR_OUTPUT=$("$NODE_BINARY" query staking validator "$VALOPER_ADDRESS" --node "tcp://localhost:$NODE_RPC_PORT" --home "$NODE_HOME" --output json 2>&1); then
-            send_telegram "❌ Ошибка при запросе статуса валидатора (staking) для ${NODE_NAME}. Проверьте бинарник, RPC, HOME или VALOPER_ADDRESS. Вывод ошибки: '${STAKING_VALIDATOR_OUTPUT}'" "ALERT"
+            send_telegram "❌ Ошибка при запросе статуса валидатора (staking) для ${NODE_NAME}. %0AПроверьте бинарник, RPC, HOME или VALOPER_ADDRESS. %0AВывод ошибки: '${STAKING_VALIDATOR_OUTPUT}'" "ALERT"
             [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: Ошибка запроса staking validator для ${NODE_NAME}. Пропускаем дальнейшие проверки для этой сети."
             continue
         fi
@@ -310,7 +310,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
                 [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: jailed_until для ${NODE_NAME} является пустой, null, 0001-01-01Z или 1970-01-01Z: '${jailed_until_from_staking}'."
             fi
 
-            send_telegram "🚨 ВНИМАНИЕ: ${NODE_NAME} сообщает, что валидатор В ТЮРЬМЕ! Срок: ${jailed_until_date_formatted}" "ALERT"
+            send_telegram "🚨 ВНИМАНИЕ: %0A${NODE_NAME} сообщает, что валидатор В ТЮРЬМЕ! %0AСрок: ${jailed_until_date_formatted}" "ALERT"
             [ "$GLOBAL_DEBUG" = true ] && echo "Валидатор ${NODE_NAME} в тюрьме. Пропускаем дальнейшие проверки пропущенных блоков, так как он уже jailed."
             continue # Если валидатор в тюрьме, нет смысла проверять пропущенные блоки.
         fi
@@ -321,7 +321,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
         [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: VALOPER_ADDRESS или PUBKEY_JSON не указаны для ${NODE_NAME}. Пропускаю проверку на jailed и пропущенные блоки."
     fi
 
-    [ "$GLOBAL_DEBUG" = true ] && echo "--- Проверка для сети: ${NODE_NAME} завершена ---"
+    [ "$GLOBAL_DEBUG" = true ] && echo "--- Проверка для сети: ${NODE_NAME^^} завершена ---"
     [ "$GLOBAL_DEBUG" = true ] && echo " "
         
     [ "$GLOBAL_DEBUG" = true ] && echo "Проверка завершена $(date -u -R)"
