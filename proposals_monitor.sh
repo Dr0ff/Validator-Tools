@@ -78,7 +78,7 @@ NETWORKS[${CHAIN3},REST_API_BASE_URL]="https://rest.cosmos.directory/${CHAIN3}"
 
 # Sentinel
 NETWORKS[${CHAIN4},REST_API_BASE_URL]="https://rest.cosmos.directory/${CHAIN4}"
-# !!! УБЕРИТЕ ЭТУ СТРОКУ, ЧТОБЫ ТЕСТИРОВАТЬ АВТООПРЕДЕЛЕНИЕ !!!
+
 # NETWORKS[${CHAIN4},GOV_MODULE_VERSION]="v1beta1"
 
 # Stargaze
