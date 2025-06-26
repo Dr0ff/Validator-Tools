@@ -5,16 +5,16 @@ NODE_NAME="Juno"
 NODE_BINARY="/home/littlefox/go/bin/junod"
 NODE_HOME="/home/littlefox/.juno"
 NODE_RPC_PORT="56657"
-TELEGRAM_BOT_TOKEN="7742907053:AAEBXW1QnEOUpVX29272V2bIQ"
+TELEGRAM_BOT_TOKEN="77429V2bIQ"
 # Отдельные чаты для тревог, отчётов и информационных сообщений:
 TELEGRAM_ALERT_CHAT_IDS=(
-    "-4785908676"
+    "-4776"
 )
 TELEGRAM_REPORT_CHAT_IDS=(
-    "-4785908676"
+    "-47676"
 )
 TELEGRAM_INFO_CHAT_IDS=(
-    "-4785908676"
+    "-4776"
 )
 
 MISSED_BLOCKS_THRESHOLD=10
