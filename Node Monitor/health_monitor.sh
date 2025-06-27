@@ -190,7 +190,7 @@ check_missed_blocks() {
     [ "$debug_enabled" = true ] && echo "DEBUG: Проверка ${node_name}: новых пропущенных блоков за ${CRON_INTERVAL} минут: ${NEWLY_MISSED_BLOCKS}. Общий: ${CURRENT_MISSED_BLOCKS}."
 
     if [ "$NEWLY_MISSED_BLOCKS" -ge "$MISSED_BLOCKS_THRESHOLD" ] && [ "$NEWLY_MISSED_BLOCKS" -gt 0 ]; then
-        send_telegram "🚨 ТРЕВОГА: %0A${node_name} пропустил ${NEWLY_MISSED_BLOCKS} блоков за ${CRON_INTERVAL} минут! %0AОбщий счетчик: ${CURRENT_MISSED_BLOCKS}." "ALERT"
+        send_telegram "🚨 ТРЕВОГА: %0A${node_name^^} пропустил ${NEWLY_MISSED_BLOCKS} блоков за ${CRON_INTERVAL} минут! %0AОбщий счетчик: ${CURRENT_MISSED_BLOCKS}." "ALERT"
     fi
 
     mkdir -p "$(dirname "$state_file")"
@@ -260,7 +260,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
     if [[ -n "$VALOPER_ADDRESS" && -n "$PUBKEY_JSON" ]]; then
         STAKING_VALIDATOR_OUTPUT=""
         if ! STAKING_VALIDATOR_OUTPUT=$("$NODE_BINARY" query staking validator "$VALOPER_ADDRESS" --node "tcp://localhost:$NODE_RPC_PORT" --home "$NODE_HOME" --output json 2>&1); then
-            send_telegram "❌ Ошибка при запросе статуса валидатора (staking) для ${NODE_NAME}. %0AПроверьте бинарник, RPC, HOME или VALOPER_ADDRESS. %0AВывод ошибки: '${STAKING_VALIDATOR_OUTPUT}'" "ALERT"
+            send_telegram "❌ Ошибка при запросе статуса валидатора (staking) для ${NODE_NAME^^}. %0AПроверьте бинарник, RPC, HOME или VALOPER_ADDRESS. %0AВывод ошибки: '${STAKING_VALIDATOR_OUTPUT}'" "ALERT"
             [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: Ошибка запроса staking validator для ${NODE_NAME}. Пропускаем дальнейшие проверки для этой сети."
             continue
         fi
@@ -310,7 +310,7 @@ for NODE_NAME_KEY in "${NETWORK_NAMES[@]}"; do
                 [ "$GLOBAL_DEBUG" = true ] && echo "DEBUG: jailed_until для ${NODE_NAME} является пустой, null, 0001-01-01Z или 1970-01-01Z: '${jailed_until_from_staking}'."
             fi
 
-            send_telegram "🚨 ВНИМАНИЕ: %0A${NODE_NAME} сообщает, что валидатор В ТЮРЬМЕ! %0AСрок: ${jailed_until_date_formatted}" "ALERT"
+            send_telegram "🚨 ВНИМАНИЕ: %0A${NODE_NAME^^} сообщает, что валидатор В ТЮРЬМЕ! %0AСрок: ${jailed_until_date_formatted}" "ALERT"
             [ "$GLOBAL_DEBUG" = true ] && echo "Валидатор ${NODE_NAME} в тюрьме. Пропускаем дальнейшие проверки пропущенных блоков, так как он уже jailed."
             continue # Если валидатор в тюрьме, нет смысла проверять пропущенные блоки.
         fi
