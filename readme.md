@@ -33,7 +33,7 @@ DAEMON tx authz grant $(DAEMON keys show votewallet --keyring-backend test -a) g
 Проверка авторизации:
 
 ```
-DAEMON q authz grants $(DAEMON keys show wallet -a) $(DAEMON keys show --keyring-backend test -a)
+DAEMON q authz grants $(DAEMON keys show wallet -a) $(DAEMON keys show votewallet --keyring-backend test -a)
 ```
 Отзыв авторизаци:
 
