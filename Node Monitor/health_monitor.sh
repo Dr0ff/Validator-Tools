@@ -6,7 +6,7 @@
 # --- ОБЩИЕ НАСТРОЙКИ (КОТОРЫЕ НУЖНО ЗАПОЛНИТЬ ВРУЧНУЮ!) ---
 TELEGRAM_BOT_TOKEN="7742907053:AAEBXUpVX272V2bIQ" # ЗАПОЛНИТЬ!
 TELEGRAM_ALERT_CHAT_IDS=( "-47676" ) # ЗАПОЛНИТЬ!
-TELEGRAM_REPORT_CHAT_IDS=( "-4776" ) # ЗАПОЛНИТЬ!
+#TELEGRAM_REPORT_CHAT_IDS=( "-4776" ) # ЗАПОЛНИТЬ!
 TELEGRAM_INFO_CHAT_IDS=( "-4776" ) # ЗАПОЛНИТЬ!
 
 # Пользователь для тега в Telegram. Оставьте пустым (""), если не хотите никого тегать.
