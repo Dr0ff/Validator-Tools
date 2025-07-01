@@ -11,7 +11,7 @@ show_logo() {
 show_logo
 
 # --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ ---
-INSTALL_DIR="$HOME/nod_monitor"
+INSTALL_DIR="$HOME/node_monitor"
 MONITOR_SCRIPT_NAME="health_monitor_v3.5.sh" # Имя основного скрипта
 CONFIG_FILE_NAME="config.json"
 INSTALL_STATE_FILE=".install_state"
@@ -91,7 +91,7 @@ check_and_install_dependencies() {
 }
 
 # Загрузка основго скрипта
-wget -O $MONITOR_SCRIPT_NAME https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/Node%20Monitor/Test/v3.5/health_monitor_v3.5.sh --inet-4
+wget -q -O $MONITOR_SCRIPT_NAME https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/Node%20Monitor/Test/v3.5/health_monitor_v3.5.sh
 
 install_monitor() {
     print_header "2. Установка скриптов и конфигурации"
@@ -286,7 +286,7 @@ list_config() {
 
 uninstall_monitor() {
     print_header "❌ Удаление системы мониторинга"
-    read -p "Вы уверены, что хотите удалить все файлы ($INSTALL_DIR) и задачу cron? (y/n): " choice
+    read -p "Вы уверены, что хотите удалить все файлы, саму директорию ($INSTALL_DIR) и задачу cron? (y/n): " choice
     if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
         echo "Удаление задачи из cron..."
         (crontab -l 2>/dev/null | grep -v "$MONITOR_SCRIPT_NAME") | crontab -
