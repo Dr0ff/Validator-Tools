@@ -2,7 +2,7 @@
 # Универсальный инсталлятор и конфигуратор для системы мониторинга нод v3.5
 
 # --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ ---
-INSTALL_DIR="$HOME/nod_monitor/v3.5"
+INSTALL_DIR="$HOME/nod_monitor"
 MONITOR_SCRIPT_NAME="health_monitor_v3.5.sh" # Имя основного скрипта
 CONFIG_FILE_NAME="config.json"
 INSTALL_STATE_FILE=".install_state"
