@@ -21,26 +21,25 @@ MONITOR_SCRIPT_PATH="$INSTALL_DIR/$MONITOR_SCRIPT_NAME"
 CONFIG_FILE_PATH="$INSTALL_DIR/$CONFIG_FILE_NAME"
 
 # Цвета для вывода
-C_HEADER='\033[95m'
+C_HEADER='\033[96m'
 C_OKGREEN='\033[92m'
 C_WARNING='\033[93m'
 C_FAIL='\033[91m'
 C_ENDC='\033[0m'
 C_BOLD='\033[1m'
+C_WHITE='\033[97m'
 
 # --- УТИЛИТЫ ВЫВОДА ---
-print_header() { echo -e "\n${C_HEADER}${C_BOLD}--- $1 ---${C_ENDC}"; }
+print_header() { echo -e "\n${C_HEADER}${C_BOLD}   --- $1 ---   ${C_ENDC}\n"; }
 print_success() { echo -e "${C_OKGREEN}✔ $1${C_ENDC}"; }
 print_warning() { echo -e "${C_WARNING}⚠ $1${C_ENDC}"; }
 print_error() { echo -e "${C_FAIL}✖ $1${C_ENDC}"; }
+print_subheader() { echo -e "${C_WHITE} $1 ${C_ENDC}"; }
 
 # --- УТИЛИТЫ КОНФИГУРАЦИИ ---
-
-# Проверка и создание файла конфигурации, если он отсутствует
 ensure_config_exists() {
     if [ ! -f "$CONFIG_FILE_PATH" ]; then
         print_warning "Файл конфигурации не найден. Создание нового..."
-        # Создаем базовую структуру JSON со всеми новыми полями
         echo '{
     "global": {
         "cosmos_directory_url": "https://rest.cosmos.directory",
@@ -63,7 +62,6 @@ ensure_config_exists() {
 }
 
 # --- ФУНКЦИИ УСТАНОВКИ ---
-
 check_and_install_dependencies() {
     print_header "1. Проверка зависимостей"
     local needs_install=false
@@ -138,7 +136,6 @@ setup_cron_job() {
 }
 
 # --- ФУНКЦИИ КОНФИГУРАЦИИ ---
-
 select_network() {
     print_header "Выбор сети"
     mapfile -t networks < <(jq -r '.networks[].name' "$CONFIG_FILE_PATH")
@@ -178,7 +175,6 @@ configure_telegram() {
     print_success "Telegram сконфигурирован."
 }
 
-# ⭐ НОВАЯ ФУНКЦИЯ
 configure_global_settings() {
     print_header "🔧 Настройка глобальных параметров"
     ensure_config_exists
@@ -217,12 +213,30 @@ add_network() {
     read -p "VALOPER адрес: " valoper
     read -p "VALCONS адрес: " valcons
     read -p "Тег пользователя для оповещений (@username): " tag
-    read -p "REST URL (опционально, оставьте пустым для автоопределения): " rest_url
-    read -p "RPC URL (опционально, оставьте пустым для автоопределения): " rpc_url
+    read -p "REST URL (опционально): " rest_url
+    read -p "RPC URL (опционально): " rpc_url
+    read -p "URL эксплорера [https://ping.pub/]: " explorer_url
+
+    # Установка значения по умолчанию для эксплорера, если ввод пустой
+    explorer_url=${explorer_url:-"https://ping.pub/"}
+
     local temp_json=$(mktemp)
     jq \
-        --arg name "$name" --arg valoper "$valoper" --arg valcons "$valcons" --arg tag "$tag" --arg rest "$rest_url" --arg rpc "$rpc_url" \
-        '.networks += [ { name: $name, valoper_address: $valoper, valcons_address: $valcons, user_tag: $tag } | if $rest != "" then . + {rest_url: $rest} else . end | if $rpc != "" then . + {rpc_url: $rpc} else . end ]' \
+        --arg name "$name" --arg valoper "$valoper" --arg valcons "$valcons" \
+        --arg tag "$tag" --arg rest "$rest_url" --arg rpc "$rpc_url" --arg explorer "$explorer_url" \
+        '
+        .networks += [
+            {
+                name: $name,
+                valoper_address: $valoper,
+                valcons_address: $valcons,
+                user_tag: $tag,
+                explorer_url: $explorer
+            }
+            | if $rest != "" then . + {rest_url: $rest} else . end
+            | if $rpc != "" then . + {rpc_url: $rpc} else . end
+        ]
+        ' \
         "$CONFIG_FILE_PATH" > "$temp_json" && mv "$temp_json" "$CONFIG_FILE_PATH"
     print_success "Сеть '$name' добавлена."
 }
@@ -234,12 +248,16 @@ edit_network() {
     local index
     select_network || return
     index=$REPLY
+
     local current_name=$(jq -r ".networks[$index].name" "$CONFIG_FILE_PATH")
     local current_valoper=$(jq -r ".networks[$index].valoper_address" "$CONFIG_FILE_PATH")
     local current_valcons=$(jq -r ".networks[$index].valcons_address" "$CONFIG_FILE_PATH")
     local current_tag=$(jq -r ".networks[$index].user_tag" "$CONFIG_FILE_PATH")
     local current_rest=$(jq -r ".networks[$index].rest_url // \"\"" "$CONFIG_FILE_PATH")
     local current_rpc=$(jq -r ".networks[$index].rpc_url // \"\"" "$CONFIG_FILE_PATH")
+    # Получаем текущий URL или default, если его нет
+    local current_explorer=$(jq -r ".networks[$index].explorer_url // \"https://ping.pub/\"" "$CONFIG_FILE_PATH")
+
     echo "Редактирование сети '$current_name'. Нажмите Enter, чтобы оставить текущее значение."
     read -p "Новое имя сети [${current_name}]: " name
     read -p "Новый VALOPER адрес [${current_valoper}]: " valoper
@@ -247,16 +265,33 @@ edit_network() {
     read -p "Новый тег пользователя [${current_tag}]: " tag
     read -p "Новый REST URL [${current_rest:-не задан}]: " rest_url
     read -p "Новый RPC URL [${current_rpc:-не задан}]: " rpc_url
+    read -p "Новый URL эксплорера [${current_explorer}]: " explorer_url
+
     name=${name:-$current_name}
     valoper=${valoper:-$current_valoper}
     valcons=${valcons:-$current_valcons}
     tag=${tag:-$current_tag}
     rest_url=${rest_url:-$current_rest}
     rpc_url=${rpc_url:-$current_rpc}
+    explorer_url=${explorer_url:-$current_explorer}
+
     local temp_json=$(mktemp)
     jq \
-      --argjson index "$index" --arg name "$name" --arg valoper "$valoper" --arg valcons "$valcons" --arg tag "$tag" --arg rest "$rest_url" --arg rpc "$rpc_url" \
-      '.networks[$index] = ( { name: $name, valoper_address: $valoper, valcons_address: $valcons, user_tag: $tag } | if $rest != "" then . + {rest_url: $rest} else . end | if $rpc != "" then . + {rpc_url: $rpc} else . end )' \
+      --argjson index "$index" --arg name "$name" --arg valoper "$valoper" --arg valcons "$valcons" \
+      --arg tag "$tag" --arg rest "$rest_url" --arg rpc "$rpc_url" --arg explorer "$explorer_url" \
+      '
+      .networks[$index] = (
+          {
+              name: $name,
+              valoper_address: $valoper,
+              valcons_address: $valcons,
+              user_tag: $tag,
+              explorer_url: $explorer
+          }
+          | if $rest != "" then . + {rest_url: $rest} else . end
+          | if $rpc != "" then . + {rpc_url: $rpc} else . end
+      )
+      ' \
       "$CONFIG_FILE_PATH" > "$temp_json" && mv "$temp_json" "$CONFIG_FILE_PATH"
     print_success "Сеть '$name' обновлена."
 }
@@ -286,7 +321,7 @@ list_config() {
 
 uninstall_monitor() {
     print_header "❌ Удаление системы мониторинга"
-    read -p "Вы уверены, что хотите удалить все файлы, саму директорию ($INSTALL_DIR) и задачу cron? (y/n): " choice
+    read -p "Вы уверены, что хотите удалить все файлы ($INSTALL_DIR) и задачу cron? (y/n): " choice
     if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
         echo "Удаление задачи из cron..."
         (crontab -l 2>/dev/null | grep -v "$MONITOR_SCRIPT_NAME") | crontab -
@@ -304,24 +339,31 @@ uninstall_monitor() {
 main_menu() {
     while true; do
         if [ ! -f "$INSTALL_DIR/$INSTALL_STATE_FILE" ]; then
-            print_header "Меню первоначальной установки"
+            print_header "     Меню первоначальной установки"
+
             echo "1) 🚀 Установить систему мониторинга (шаги 1-3)"
             echo "q) Выход"
         else
+
             print_header "Главное меню управления мониторингом"
-            echo "--- Установка и Обновление ---"
+
+            print_subheader "        --- Установка и Обновление ---"
             echo "1) Проверить зависимости"
             echo "2) Переустановить скрипты (обновить)"
             echo "3) Настроить/обновить задачу Cron"
-            echo "--- Конфигурация ---"
+			echo""
+
+            print_subheader "            --- Конфигурация ---"
             echo "4) 💬 Настроить Telegram"
             echo "5) 🔧 Настроить глобальные параметры"
             echo "6) ➕ Добавить сеть"
             echo "7) ✍️ Редактировать сеть"
             echo "8) ➖ Удалить сеть"
             echo "9) 📄 Показать текущий конфиг"
-            echo "--- Обслуживание ---"
-            echo "10) ❌ Удалить систему мониторинга"
+			echo ""
+
+            print_subheader "            --- Обслуживание ---"
+            echo "101) ❌ Удалить систему мониторинга"
             echo "q) Выход"
         fi
 
@@ -344,7 +386,7 @@ main_menu() {
                 7) edit_network ;;
                 8) delete_network ;;
                 9) list_config ;;
-                10) uninstall_monitor; break ;;
+                101) uninstall_monitor; break ;;
                 q|Q) echo "Выход."; break ;;
                 *) print_warning "Неверный выбор." ;;
             esac
