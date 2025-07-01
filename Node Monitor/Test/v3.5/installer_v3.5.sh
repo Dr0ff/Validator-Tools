@@ -1,6 +1,15 @@
 #!/bin/bash
 # Универсальный инсталлятор и конфигуратор для системы мониторинга нод v3.5
 
+clear
+show_logo() {
+    echo -e "\e[92m"
+    curl -s https://raw.githubusercontent.com/Dr0ff/Useful-scripts/refs/heads/main/tt.logo.txt
+    echo -e "\e[0m"
+}
+
+show_logo
+
 # --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ ---
 INSTALL_DIR="$HOME/nod_monitor"
 MONITOR_SCRIPT_NAME="health_monitor_v3.5.sh" # Имя основного скрипта
@@ -80,6 +89,9 @@ check_and_install_dependencies() {
         print_success "Зависимости успешно установлены."
     fi
 }
+
+# Загрузка основго скрипта
+wget -O $MONITOR_SCRIPT_NAME https://raw.githubusercontent.com/Dr0ff/Validator-Tools/refs/heads/main/Node%20Monitor/Test/v3.5/health_monitor_v3.5.sh --inet-4
 
 install_monitor() {
     print_header "2. Установка скриптов и конфигурации"
