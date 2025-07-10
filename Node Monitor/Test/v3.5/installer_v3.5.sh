@@ -339,7 +339,7 @@ uninstall_monitor() {
 main_menu() {
     while true; do
         if [ ! -f "$INSTALL_DIR/$INSTALL_STATE_FILE" ]; then
-            print_header "     Меню первоначальной установки"
+            print_header "     Меню первоначальной установки     "
 
             echo "1) 🚀 Установить систему мониторинга (шаги 1-3)"
             echo "q) Выход"
